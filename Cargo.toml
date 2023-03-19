@@ -1,0 +1,33 @@
+[package]
+name = "ezw"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tera = "1.18.1"
+
+serde = { version = "1.0", features = ["derive"] }
+
+# serde_json is just for the example, not required in general
+serde_json = "1.0"
+serde_yaml = "0.9"
+tokio = { version = "1.26.0", features = ["full"] }
+serde_with = "2.3.1"
+
+# opt-level
+# 0：不进行优化，并且激活#[cfg(debug_assertions)]属性。
+# 1：允许基本优化。
+# 2：允许常用的优化。
+# 3：允许所有的优化。
+# "s"：允许常用的优化，外加一些能缩小体积的优化。
+# "z"：类似"s"，但更偏重于体积的优化(可能会降低性能)。
+[profile.dev]
+opt-level = 0
+lto = "thin"
+codegen-units = 2048
+
+[profile.release]
+opt-level = 3
+codegen-units = 1

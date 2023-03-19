@@ -1,0 +1,30 @@
+# 模板目录匹配位置
+input_path: templates/**/*.js
+# 生成配置
+build:
+    global:
+        name: hello
+        name2: hello2
+
+    # 生成文件信息
+    files:
+        - 
+            # 模板名称
+            name: index.js
+            # 根据模板生成的文件
+            build_file:
+                - 
+                    # 生成文件位置
+                    out_file: build/index.js
+                    # 是否生成
+                    build: true
+        - 
+            # 模板名称
+            name: api/hello.js
+            # 根据模板生成的文件
+            build_file:
+                -       
+                    # 生成文件位置
+                    out_file: build/api/hello_service.js
+                    # 是否生成
+                    build: false
