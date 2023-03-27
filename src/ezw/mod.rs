@@ -62,7 +62,7 @@ impl Ezw {
         let configer = serde_yaml::from_str::<Config>(&config_context)?;
         // 设置应用配置
         self.config = Some(configer);
-        dbg!("应用配置设置成功");
+        println!("应用配置设置成功");
         Ok(())
     }
 
@@ -131,14 +131,19 @@ impl Ezw {
                 }
 
                 // 生成文件
-                for bf in &self.build_files {
+                for bf in self.build_files.clone().into_iter() {
                     if !bf.config.build {
                         // 文件不参与生成
                         continue;
                     }
                     
+                    // 多线程生成
+                    let build_res = tokio::spawn(async move {
+                        bf.clone().build().await
+                    }).await.unwrap();
+
                     // 生成文件
-                    match bf.build().await {
+                    match build_res {
                         Ok(_) =>  {
                             // 生成文件成功
                             self.build_count +=  1;
