@@ -5,7 +5,7 @@ use serde_with::{self, skip_serializing_none};
 
 /// 生成配置
 #[serde_with::skip_serializing_none]
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct BuildConfig {
     /// 全局模板内容值设置
     pub global: Option<HashMap<String, String>>,

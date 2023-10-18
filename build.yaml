@@ -1,5 +1,5 @@
 # 模板目录匹配位置
-input_path: templates/**/*.js
+input_path: ./templates/**/*.js
 # 生成配置
 build:
     global:
@@ -25,6 +25,6 @@ build:
             build_file:
                 -       
                     # 生成文件位置
-                    out_file: build/api/hello_service.js
+                    out_file: build/api/{{build_name}}_service.js
                     # 是否生成
                     build: false

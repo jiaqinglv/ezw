@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{template::{Template, build::{BuildFile, BuildError}}, config::Config};
+use crate::{template::{Template, build::{BuildFile, BuildError, }}, config::{Config, BuildType}};
 use tera::{Tera, Context};
 use tokio;
 use serde_yaml;
@@ -12,7 +12,11 @@ pub struct Ezw {
     /// 模板列表
     pub templates: HashMap<String, Template>,
     /// 配置
-    pub config: Option<Config>,
+    pub build_config: Option<Config>,
+    /// 生成方式
+    pub build_type: BuildType,
+    /// 生成名称-用于替换配置文件中的信息
+    pub build_name: String,
     /// 全局内容设置
     global_context: Context,
     // 生成文件列表
@@ -21,7 +25,7 @@ pub struct Ezw {
     build_count: i64,
     /// 生成失败数量
     build_error_count: i64,
-    // 错误列表
+    /// 错误列表
     build_errors: Vec<BuildError>,
 }
 
@@ -32,8 +36,10 @@ impl Ezw {
         Ezw {
             name: name.to_string(),
             templates: HashMap::new(),
-            config: None,
+            build_config: None,
             global_context: Context::new(),
+            build_type: BuildType::FILE,
+            build_name: String::from(""),
             build_files: Vec::new(),
             build_count: 0,
             build_error_count: 0,
@@ -44,11 +50,14 @@ impl Ezw {
     /// 获取json配置文件
     pub async fn get_json_config(&mut self, path: String) -> Result<(), Box<dyn std::error::Error>> {
         // 读取配置文件
-        let config_context = tokio::fs::read_to_string(path).await?;
+        let mut config_context = tokio::fs::read_to_string(path).await?;
+        if self.build_type == BuildType::CMD {
+            config_context =config_context.replace("{{build_name}}", &self.build_name);
+        }
         // 转换成配置
-        let configer = serde_json::from_str::<Config>(&config_context)?;
+        let config = serde_json::from_str::<Config>(&config_context)?;
         // 设置应用配置
-        self.config = Some(configer);
+        self.build_config = Some(config);
 
         Ok(())
     }
@@ -57,11 +66,15 @@ impl Ezw {
     pub async fn get_yaml_config(&mut self, path: String) -> Result<(), Box<dyn std::error::Error>> {
         println!("配置文件位置:{}", path.clone());
         // 读取配置文件
-        let config_context = tokio::fs::read_to_string(path).await?;
+        let mut config_context = tokio::fs::read_to_string(path).await?;
+        if self.build_type == BuildType::CMD {
+            config_context =config_context.replace("{{build_name}}", &self.build_name);
+        }
+        println!("config:{}", config_context);
         // 转换成配置
-        let configer = serde_yaml::from_str::<Config>(&config_context)?;
+        let config = serde_yaml::from_str::<Config>(&config_context)?;
         // 设置应用配置
-        self.config = Some(configer);
+        self.build_config = Some(config);
         println!("应用配置设置成功");
         Ok(())
     }
@@ -94,7 +107,7 @@ impl Ezw {
 
     /// 根据配置生成文件
     pub async fn build(&mut self) ->  Result<(), Box<dyn std::error::Error>>{
-        match &self.config {
+        match &self.build_config {
             Some(c) => {
                 println!("{}", &c.input_path);
                 // 匹配模板
