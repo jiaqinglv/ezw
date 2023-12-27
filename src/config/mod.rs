@@ -6,9 +6,9 @@ use build::BuildConfig;
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum BuildType {
-    // 使用命令生成
+    /// 使用命令生成
     CMD,
-    // 指定使用文件生成
+    /// 指定使用文件生成
     FILE
 }
 
